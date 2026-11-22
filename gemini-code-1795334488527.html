@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Condo Games - Obsidian Sunset Hub</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon.png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.06ms!important;}}
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html { scroll-behavior: smooth; }
+        body {
+            background:
+                radial-gradient(circle at 12% 10%, rgba(249, 115, 22, 0.22), transparent 40%),
+                radial-gradient(circle at 88% 15%, rgba(225, 29, 72, 0.20), transparent 42%),
+                radial-gradient(circle at 50% 88%, rgba(245, 158, 11, 0.12), transparent 48%),
+                linear-gradient(170deg, var(--bg), var(--bg-2));
+            color: var(--ink);
+            font-family: var(--font-b);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        a { color: inherit; text-decoration: none; }
+        button { padding: 0; border: 0; color: inherit; background: none; font: inherit; cursor: pointer; touch-action: manipulation; }
+        svg, img, video { display: block; max-width: 100%; }
+        .wrap { width: min(1240px, 94vw); margin-inline: auto; }
+        @media(min-width: 640px) { .wrap { width: min(1240px, 92vw); } }
+
+        :root{
+            --bg:#0b0706; --bg-2:#160d0b;
+            --glass:rgba(255, 255, 255, 0.065);
+            --glass-hi:rgba(255, 255, 255, 0.12);
+            --line:rgba(255, 255, 255, 0.14);
+            --line-bright:rgba(255, 255, 255, 0.28);
+            --ink:#faf4f0; --ink-dim:#d6c3b8; --ink-faint:#9e8679;
+            --amber:#f59e0b; --orange:#f97316; --rose:#e11d48; --green:#34d399;
+            --blur:blur(24px) saturate(175%);
+            --shadow:0 24px 60px -20px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+            --font-d:"Space Grotesk",system-ui,sans-serif;
+            --font-b:-apple-system,BlinkMacSystemFont,"SF Pro Display","Plus Jakarta Sans",sans-serif;
+        }
+        @media(min-width: 768px) { :root { --blur: blur(28px) saturate(180%); } }
+
+        /* ---------- LOADING SCREEN ---------- */
+        #loading-screen {
+            position: fixed; inset: 0; z-index: 99999;
+            background: radial-gradient(circle at 50% 50%, rgba(45, 20, 14, 0.85), rgba(11, 7, 6, 0.96) 90%);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px;
+            opacity: 1; visibility: visible;
+            transition: opacity 0.7s ease, transform 0.7s ease, visibility 0.7s ease;
+        }
+        #loading-screen.fade-out {
+            opacity: 0; transform: scale(1.04); visibility: hidden; pointer-events: none;
+        }
+        .loader-orbit {
+            position: relative; width: 96px; height: 96px; display: flex; align-items: center; justify-content: center;
+        }
+        @media(min-width: 768px) { .loader-orbit { width: 104px; height: 104px; } }
+        .loader-ring-outer {
+            position: absolute; inset: 0; border-radius: 50%;
+            border: 1.5px dashed rgba(255, 255, 255, 0.26);
+            animation: spin 9s linear infinite;
+        }
+        .loader-ring-inner {
+            position: absolute; inset: 12px; border-radius: 50%;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--orange);
+            border-bottom: 2px solid var(--rose);
+            animation: spin-reverse 1.4s linear infinite;
+        }
+        .loader-core {
+            width: 46px; height: 46px;
+            background: linear-gradient(145deg, rgba(249, 115, 22, 0.75), rgba(225, 29, 72, 0.65));
+            border: 1px solid rgba(255, 255, 255, 0.34);
+            border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 12px 30px rgba(249, 115, 22, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+        }
+        .loader-core i { font-size: 18px; color: #fff; }
+        .loading-title { margin-top: 22px; font-weight: 700; font-size: clamp(1rem, 4.5vw, 1.15rem); letter-spacing: 2px; font-family: var(--font-d); text-align: center; }
+        .loading-title span { color: var(--orange); }
+        .loading-bar-track { width: min(250px, 76vw); height: 6px; background: var(--glass); border-radius: 999px; margin-top: 16px; overflow: hidden; border: 1px solid var(--line); }
+        .loading-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--amber), var(--orange), var(--rose)); border-radius: 999px; transition: width 0.22s ease-out; }
+        .loading-text { font-size: 12px; color: var(--ink-dim); margin-top: 10px; letter-spacing: 0.6px; font-family: var(--font-d); text-align: center; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin-reverse { to { transform: rotate(-360deg); } }
+
+        #app-content {
+            opacity: 0; transform: translateY(18px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            padding-bottom: 36px;
+        }
+        #app-content.visible { opacity: 1; transform: translateY(0); }
+
+        /* ---------- FLOATING GLASS NAVBAR ---------- */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center; gap: 10px;
+            padding: 10px 14px;
+            width: min(1240px, 94vw); margin: 10px auto 0;
+            border-radius: 20px;
+            background: var(--glass-hi);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--line-bright);
+            box-shadow: var(--shadow);
+            position: sticky; top: max(10px, env(safe-area-inset-top)); z-index: 100;
+        }
+        @media(min-width: 768px) {
+            .navbar { padding: 12px 18px; width: min(1240px, 92vw); margin: 14px auto 0; border-radius: 22px; }
+        }
+        .nav-brand { display: flex; align-items: center; gap: 9px; font-family: var(--font-d); font-weight: 700; font-size: clamp(0.88rem, 3.8vw, 1.02rem); letter-spacing: 0.4px; min-width: 0; }
+        .nav-brand > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .brand-icon {
+            width: 30px; height: 30px;
+            background: linear-gradient(145deg, rgba(249, 115, 22, 0.8), rgba(225, 29, 72, 0.72));
+            border: 1px solid rgba(255, 255, 255, 0.34);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 0.85rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+            flex-shrink: 0;
+        }
+        .nav-brand span span { color: var(--orange); }
+        .nav-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+        /* ---------- HERO + LIVE FEED SPLIT ---------- */
+        .hero { padding: 20px 0 14px; }
+        @media(min-width: 768px) { .hero { padding: 34px 0 18px; } }
+        .hero-split {
+            display: grid; grid-template-columns: 1fr; gap: 14px; align-items: stretch;
+        }
+        @media(min-width: 900px) {
+            .hero-split { grid-template-columns: 1.05fr 0.95fr; gap: 24px; }
+        }
+        .hero-panel {
+            background: var(--glass);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--line-bright);
+            border-radius: 22px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        @media(min-width: 768px) { .hero-panel { border-radius: 26px; padding: 26px; } }
+        .eyebrow {
+            display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
+            font-family: var(--font-d); font-weight: 600; font-size: .7rem; letter-spacing: .1em;
+            color: var(--ink); padding: 5px 12px;
+            border: 1px solid var(--line-bright); border-radius: 999px;
+            background: var(--glass-hi); margin-bottom: 14px;
+        }
+        .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+        h1.title {
+            font-family: var(--font-d); font-weight: 700; line-height: 1.08;
+            font-size: clamp(1.85rem, 7.2vw, 3.3rem); letter-spacing: -.02em; margin-bottom: 10px;
+        }
+        h1.title .accent { color: var(--orange); }
+        .lede { font-size: clamp(0.9rem, 3.6vw, 0.98rem); color: var(--ink-dim); max-width: 48ch; margin-bottom: 18px; }
+
+        .cta-row { display: flex; flex-direction: column; gap: 10px; }
+        @media(min-width: 520px) { .cta-row { flex-direction: row; flex-wrap: wrap; } }
+        .btn {
+            font-family: var(--font-d); font-weight: 600; font-size: 0.9rem;
+            padding: 12px 18px; min-height: 44px; border-radius: 15px;
+            border: 1px solid var(--line-bright);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            cursor: pointer; transition: transform .16s, border-color .16s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        .btn:hover { border-color: rgba(255,255,255,0.48); }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(249,115,22,0.82), rgba(225,29,72,0.75));
+            color: #fff; width: 100%;
+        }
+        .btn-discord {
+            background: rgba(88, 101, 242, 0.78);
+            color: #fff; width: 100%;
+        }
+        @media(min-width: 520px) {
+            .btn-primary { width: auto; flex: 1; min-width: 150px; }
+            .btn-discord { width: auto; flex: 1; min-width: 130px; }
+        }
+
+        /* ---------- LIVE FEED CARD ---------- */
+        .live-feed-card {
+            background: var(--glass);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--line-bright);
+            border-radius: 22px; overflow: hidden; box-shadow: var(--shadow);
+            display: flex; flex-direction: column;
+        }
+        @media(min-width: 768px) { .live-feed-card { border-radius: 26px; } }
+        .live-video-box {
+            position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 260px; background: #000; overflow: hidden;
+        }
+        .live-video-box video {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+        }
+        .live-pill {
+            position: absolute; top: 10px; left: 10px; z-index: 5;
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(11, 7, 6, 0.68); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--line-bright);
+            color: #fff; font-size: 10px; font-weight: 700; padding: 5px 11px; border-radius: 999px;
+            font-family: var(--font-d); letter-spacing: 0.7px;
+        }
+        .live-dot {
+            width: 7px; height: 7px; border-radius: 50%; background: var(--rose);
+            box-shadow: 0 0 8px var(--rose);
+        }
+        .live-host-pill {
+            position: absolute; bottom: 10px; left: 10px; z-index: 5;
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(11, 7, 6, 0.68); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            padding: 4px 12px 4px 6px; border-radius: 999px; border: 1px solid var(--line-bright);
+        }
+        .live-host-pill img {
+            width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.55); object-fit: cover;
+        }
+        .live-host-pill span { font-size: 11px; font-weight: 600; font-family: var(--font-d); color: #fff; }
+        .live-feed-body {
+            padding: 15px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+        }
+        .live-feed-body h2 { font-family: var(--font-d); font-size: 1rem; font-weight: 700; margin-bottom: 2px; }
+        .live-feed-body p { font-size: 0.82rem; color: var(--ink-dim); }
+        .sound-toggle {
+            background: var(--glass-hi); border: 1px solid var(--line-bright);
+            border-radius: 999px; padding: 8px 14px; min-height: 36px; font-size: 0.76rem; font-family: var(--font-d); font-weight: 600;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+
+        /* ---------- STATS BAR ---------- */
+        .stats { margin-top: 14px; }
+        @media(min-width: 768px) { .stats { margin-top: 18px; } }
+        .stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+        @media(min-width: 768px) { .stats-grid { grid-template-columns: repeat(4,1fr); gap: 12px; } }
+        .stat {
+            background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--line); border-radius: 18px; padding: 14px 12px; text-align: center;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        @media(min-width: 768px) { .stat { border-radius: 20px; padding: 16px; } }
+        .stat .num { font-family: var(--font-d); font-weight: 700; font-size: clamp(1.25rem, 4.5vw, 1.9rem); line-height: 1.1; color: var(--ink); }
+        .stat .lbl { margin-top: 5px; font-size: .66rem; letter-spacing: .09em; color: var(--ink-faint); font-family: var(--font-d); font-weight: 600; }
+
+        /* ---------- SECTION HEADER ---------- */
+        .sec { padding: 30px 0 0; }
+        @media(min-width: 768px) { .sec { padding: 38px 0 0; } }
+        .sec-head {
+            display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+            margin-bottom: 18px;
+        }
+        @media(min-width: 768px) {
+            .sec-head { flex-direction: row; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 20px; }
+        }
+        .sec-title-wrap h2 {
+            font-family: var(--font-d); font-weight: 700; font-size: clamp(1.35rem, 5vw, 2rem);
+            letter-spacing: -.01em; position: relative; padding-left: 14px;
+        }
+        .sec-title-wrap h2::before {
+            content: ""; position: absolute; left: 0; top: 10%; bottom: 10%; width: 4px;
+            border-radius: 2px; background: linear-gradient(var(--orange), var(--rose));
+        }
+        .sec-title-wrap p { color: var(--ink-faint); font-size: .84rem; margin-top: 3px; }
+
+        .timer-pill {
+            background: var(--glass-hi); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--line-bright); border-radius: 999px;
+            padding: 8px 14px; min-height: 38px; font-size: 0.78rem; font-family: var(--font-d); font-weight: 600;
+            display: inline-flex; align-items: center; gap: 6px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.24);
+        }
+        .timer-pill strong { color: var(--orange); font-variant-numeric: tabular-nums; }
+
+        /* ---------- FEATURED SLOT ON TOP + GRID BELOW ---------- */
+        .games-stack {
+            display: flex; flex-direction: column; gap: 18px;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .games-stack.swapping {
+            opacity: 0.45; transform: scale(0.99);
+        }
+
+        .spotlight-card {
+            background: var(--glass-hi);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--line-bright);
+            border-radius: 22px; overflow: hidden; box-shadow: var(--shadow);
+            display: grid; grid-template-columns: 1fr;
+        }
+        @media(min-width: 820px) {
+            .spotlight-card { border-radius: 26px; grid-template-columns: 1.05fr 1fr; align-items: stretch; }
+        }
+        .spotlight-thumb {
+            position: relative; width: 100%; min-height: 200px; height: 100%; background: #140b09; overflow: hidden;
+        }
+        @media(min-width: 820px) {
+            .spotlight-thumb { min-height: 250px; }
+        }
+        .spotlight-thumb img {
+            width: 100%; height: 100%; object-fit: cover; transition: transform 0.45s ease;
+        }
+        .spotlight-card:hover .spotlight-thumb img { transform: scale(1.04); }
+        .spotlight-badge {
+            position: absolute; top: 12px; left: 12px;
+            background: linear-gradient(135deg, rgba(249,115,22,0.9), rgba(225,29,72,0.85));
+            border: 1px solid rgba(255,255,255,0.35);
+            color: #fff; font-size: 10px; font-weight: 700; padding: 5px 12px; border-radius: 999px;
+            font-family: var(--font-d); letter-spacing: 0.6px;
+        }
+        .spotlight-body {
+            padding: 18px; display: flex; flex-direction: column; justify-content: center; gap: 12px;
+        }
+        @media(min-width: 820px) {
+            .spotlight-body { padding: 24px 26px; gap: 14px; }
+        }
+        .spotlight-body h3 { font-family: var(--font-d); font-size: clamp(1.2rem, 4vw, 1.55rem); font-weight: 700; }
+        .spotlight-body p { font-size: 0.9rem; color: var(--ink-dim); line-height: 1.5; }
+
+        .server-grid {
+            display: grid; grid-template-columns: 1fr; gap: 12px;
+        }
+        @media(min-width: 580px) {
+            .server-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        }
+        @media(min-width: 1024px) {
+            .server-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        }
+
+        .server-card {
+            background: var(--glass);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--line);
+            border-radius: 20px; overflow: hidden; box-shadow: var(--shadow);
+            display: flex; flex-direction: column;
+            transition: transform 0.22s ease, border-color 0.22s ease;
+        }
+        @media(min-width: 768px) { .server-card { border-radius: 22px; } }
+        .server-card:hover { transform: translateY(-3px); border-color: var(--line-bright); }
+
+        .server-thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 142px; background: #140b09; overflow: hidden; }
+        .server-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .server-card:hover .server-thumb img { transform: scale(1.04); }
+
+        .status-tag {
+            position: absolute; top: 9px; left: 9px;
+            background: rgba(11, 7, 6, 0.66); border: 1px solid var(--line-bright);
+            color: var(--green); font-size: 9px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            font-family: var(--font-d); display: flex; align-items: center; gap: 4px;
+        }
+        .ping-tag {
+            position: absolute; top: 9px; right: 9px;
+            background: rgba(11, 7, 6, 0.66); border: 1px solid var(--line);
+            color: var(--ink); font-size: 10px; padding: 3px 8px; border-radius: 999px;
+            font-family: var(--font-d); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+
+        .server-info { padding: 14px; display: flex; flex-direction: column; flex-grow: 1; }
+        .server-name { font-size: 0.96rem; font-weight: 700; margin-bottom: 5px; font-family: var(--font-d); color: var(--ink); }
+        .server-desc { font-size: 0.8rem; color: var(--ink-dim); margin-bottom: 12px; line-height: 1.42; }
+
+        .player-strip {
+            display: flex; align-items: center; gap: 6px; margin-bottom: 12px; margin-top: auto;
+            background: rgba(255,255,255,0.045); padding: 7px 10px; border-radius: 13px;
+            border: 1px solid rgba(255,255,255,0.09);
+        }
+        .player-avatars-group { display: flex; align-items: center; }
+        .player-avatar-sm {
+            width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.5);
+            object-fit: cover; margin-right: -7px;
+        }
+        .player-count-label { font-size: 11px; color: var(--ink-dim); margin-left: 11px; font-weight: 600; font-family: var(--font-d); }
+
+        .join-btn {
+            display: block; width: 100%; padding: 11px; min-height: 44px;
+            background: linear-gradient(135deg, rgba(249,115,22,0.82), rgba(225,29,72,0.75));
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.36);
+            border-radius: 14px; color: #fff; font-weight: 700; font-size: 0.85rem;
+            text-align: center; cursor: pointer; letter-spacing: 0.4px; font-family: var(--font-d);
+            transition: transform 0.15s, border-color 0.15s;
+        }
+        .join-btn:hover { border-color: rgba(255,255,255,0.52); }
+        .join-btn:active { transform: scale(0.98); }
+
+        /* ---------- CONNECTING MODAL ---------- */
+        .loading-modal {
+            position: fixed; inset: 0; background: rgba(11, 7, 6, 0.74); z-index: 9998;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 16px;
+        }
+        .loading-modal.active { opacity: 1; pointer-events: all; }
+        .loading-content {
+            background: var(--glass-hi); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            padding: 26px 20px; border-radius: 22px; text-align: center;
+            border: 1px solid var(--line-bright); box-shadow: var(--shadow); max-width: 310px; width: 100%;
+        }
+        .loading-spinner {
+            width: 42px; height: 42px; border: 3px solid rgba(255,255,255,0.16);
+            border-top: 3px solid var(--orange); border-radius: 50%;
+            animation: spin 0.9s linear infinite; margin: 0 auto 14px;
+        }
+        .loading-content h3 { margin: 0 0 6px; font-size: 1.05rem; color: #fff; font-family: var(--font-d); }
+        .loading-content p { margin: 0; font-size: 0.84rem; color: var(--ink-dim); }
+
+        /* ---------- BROWSER MODAL ---------- */
+        .browser-modal-overlay {
+            position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(11, 7, 6, 0.8);
+            z-index: 99999; display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+        }
+        .browser-modal-overlay.active { display: flex; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+        .chrome-window {
+            width: 100%; max-width: 1100px; height: 100vh; height: 100dvh; background: #fff;
+            overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(0,0,0,0.65);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        .chrome-titlebar { background: #dee1e6; height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 0 4px; flex-shrink: 0; }
+        .chrome-tabs { display: flex; height: 34px; margin-top: 6px; overflow-x: auto; max-width: 78%; }
+        .chrome-tab { background: #fff; border-radius: 8px 8px 0 0; padding: 0 8px; min-width: 120px; max-width: 200px; display: flex; align-items: center; }
+        .chrome-tab-icon { width: 14px; height: 14px; margin-right: 6px; flex-shrink: 0; }
+        .chrome-tab-title { font-size: 11px; color: #333; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 4px; }
+        .chrome-tab-close { font-size: 16px; color: #5f6368; cursor: pointer; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .chrome-window-controls { display: flex; height: 40px; align-items: center; }
+        .chrome-window-controls span { width: 36px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #333; cursor: pointer; }
+        .chrome-window-controls .chrome-close-btn { width: 42px; height: 40px; }
+        .chrome-window-controls .chrome-close-btn:hover { background: #e81123; color: #fff; }
+        .chrome-toolbar { background: #fff; height: 44px; display: flex; align-items: center; padding: 0 8px; border-bottom: 1px solid #dadce0; flex-shrink: 0; gap: 6px; }
+        .chrome-nav-btns { display: flex; gap: 2px; }
+        .chrome-icon { width: 28px; height: 28px; padding: 4px; border-radius: 50%; fill: #5f6368; }
+        .chrome-address-bar { flex-grow: 1; background: #f1f3f4; height: 32px; border-radius: 16px; display: flex; align-items: center; padding: 0 10px; gap: 6px; min-width: 0; }
+        .chrome-lock { width: 12px; height: 12px; fill: #5f6368; flex-shrink: 0; }
+        .chrome-url { font-size: 12px; color: #202124; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chrome-url-dim { color: #5f6368; }
+        .browser-content { flex-grow: 1; background: #fff; display: flex; flex-direction: column; min-height: 0; }
+        .browser-content iframe { flex-grow: 1; width: 100%; height: 100%; border: none; display: block; }
+
+        @media(min-width: 768px) {
+            .chrome-window { border-radius: 16px; height: 85vh; width: 95vw; }
+            .browser-modal-overlay { padding: 20px; }
+        }
+
+        /* ---------- FOOTER ---------- */
+        footer {
+            margin-top: 40px; border-top: 1px solid var(--line); padding: 22px 0;
+            background: rgba(255,255,255,0.03); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+        }
+        @media(min-width: 768px) { footer { margin-top: 52px; padding: 26px 0; } }
+        .foot-in { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px; text-align: center; }
+        @media(min-width: 768px) { .foot-in { flex-direction: row; text-align: left; gap: 14px; } }
+        .brand { font-family: var(--font-d); font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; justify-content: center; }
+        .brand .mk {
+            width: 26px; height: 26px; border-radius: 8px;
+            background: linear-gradient(135deg, rgba(249,115,22,0.8), rgba(225,29,72,0.72));
+            border: 1px solid rgba(255,255,255,0.3); display: grid; place-items: center; font-size: .8rem; color: #fff;
+        }
+        .foot-in p { color: var(--ink-faint); font-size: .82rem; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="loader-orbit">
+            <div class="loader-ring-outer"></div>
+            <div class="loader-ring-inner"></div>
+            <div class="loader-core"><i class="fa-solid fa-fire-flame-curved"></i></div>
+        </div>
+        <div class="loading-title">CONDO <span>SUNSET HUB</span></div>
+        <div class="loading-bar-track">
+            <div class="loading-bar-fill" id="loading-bar"></div>
+        </div>
+        <div class="loading-text" id="loading-text">Loading rooms...</div>
+    </div>
+
+    <div id="app-content">
+        <header class="navbar">
+            <div class="nav-brand">
+                <div class="brand-icon"><i class="fa-solid fa-fire-flame-curved"></i></div>
+                <span>CONDO <span>HUB</span></span>
+            </div>
+            <div class="nav-actions">
+                <a href="https://discord.gg/VEMNjavWzP" target="_blank" rel="noopener noreferrer" class="btn btn-discord" style="padding: 6px 12px; min-height: 36px; width: auto; font-size: 0.76rem;"><i class="fa-brands fa-discord"></i> Discord</a>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="wrap">
+                <div class="hero-split">
+                    <div class="hero-panel">
+                        <div>
+                            <div class="eyebrow"><span class="dot"></span> 9 PRIVATE ROOMS LIVE</div>
+                            <h1 class="title">Condo <span class="accent">Server</span> Board</h1>
+                            <p class="lede">Pick any room below to open the private link right away. The featured game at the top rotates automatically every 30 seconds.</p>
+                        </div>
+                        <div class="cta-row">
+                            <button class="btn btn-primary" onclick="launchSpotlightServer()"><i class="fa-solid fa-play"></i> Join Featured Room</button>
+                            <a href="https://discord.gg/VEMNjavWzP" target="_blank" rel="noopener noreferrer" class="btn btn-discord"><i class="fa-brands fa-discord"></i> Discord</a>
+                        </div>
+                    </div>
+
+                    <div class="live-feed-card">
+                        <div class="live-video-box">
+                            <span class="live-pill"><span class="live-dot"></span> LIVE FEED</span>
+                            <video id="liveFeedVideo" autoplay loop muted playsinline poster="https://raw.githubusercontent.com/tokun787-boop/Condo-Games-/main/image/server2.jpg">
+                                <source src="https://raw.githubusercontent.com/tokun787-boop/Condo-Games-/main/image/vidio.mp4" type="video/mp4">
+                            </video>
+                            <div class="live-host-pill">
+                                <img src="https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A4F764CB5B7A62140A826DCBA9EE5F7E-Png/150/150/AvatarHeadshot/Webp/noFilter" alt="Host">
+                                <span>LiveHost_01</span>
+                            </div>
+                        </div>
+                        <div class="live-feed-body">
+                            <div>
+                                <h2>Live Room Stream</h2>
+                                <p>Real-time preview feed from the active lobby.</p>
+                            </div>
+                            <button class="sound-toggle" id="muteToggleBtn" onclick="toggleFeedSound()">
+                                <i class="fa-solid fa-volume-xmark"></i> Unmute
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stats-grid">
+                        <div class="stat"><div class="num" id="totalActivePlayers">32,450</div><div class="lbl">PLAYERS</div></div>
+                        <div class="stat"><div class="num" id="onlineCount">118</div><div class="lbl">ONLINE PLAYERS</div></div>
+                        <div class="stat"><div class="num" id="mainServerPing">14ms</div><div class="lbl">MAIN SERVER PING</div></div>
+                        <div class="stat"><div class="num">4.9 ★</div><div class="lbl">RATINGS</div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="sec" id="hub-section">
+            <div class="wrap">
+                <div class="sec-head">
+                    <div class="sec-title-wrap">
+                        <h2>Server Lineup</h2>
+                        <p>Featured slot sits on top and rotates automatically every 30 seconds.</p>
+                    </div>
+                    <div class="timer-pill">
+                        <i class="fa-regular fa-clock"></i> Auto-rotates in <strong id="rotateCountdown">30s</strong>
+                    </div>
+                </div>
+
+                <div class="games-stack" id="gamesStack">
+                    <div id="spotlightSlot"></div>
+                    <div class="server-grid" id="serverGridContainer"></div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="wrap foot-in">
+                <div>
+                    <div class="brand"><div class="mk"><i class="fa-solid fa-fire-flame-curved"></i></div> Condo Server Hub</div>
+                    <p style="margin-top: 5px;">Private server directory with automatic featured room rotation.</p>
+                </div>
+                <a href="https://discord.gg/VEMNjavWzP" target="_blank" rel="noopener noreferrer" class="btn btn-discord" style="padding: 9px 15px; width: auto; font-size: 0.8rem;"><i class="fa-brands fa-discord"></i> Discord</a>
+            </div>
+        </footer>
+    </div>
+
+    <div class="loading-modal" id="loadingModal">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3>Connecting...</h3>
+            <p id="loadingText">Opening server link</p>
+        </div>
+    </div>
+
+    <div id="browserModal" class="browser-modal-overlay">
+        <div class="chrome-window">
+            <div class="chrome-titlebar">
+                <div class="chrome-tabs">
+                    <div class="chrome-tab active">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Roblox_Corporation_2025_logo.svg" class="chrome-tab-icon" alt="Logo">
+                        <span class="chrome-tab-title" id="modalTabTitle">Session Window</span>
+                        <span class="chrome-tab-close" id="closeTabBtn">&times;</span>
+                    </div>
+                </div>
+                <div class="chrome-window-controls">
+                    <span style="display:none">&#8211;</span>
+                    <span style="display:none">&#9744;</span>
+                    <span class="chrome-close-btn" id="closeBrowserBtn">&#10005;</span>
+                </div>
+            </div>
+            <div class="chrome-toolbar">
+                <div class="chrome-nav-btns">
+                    <svg viewBox="0 0 24 24" class="chrome-icon"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>
+                    <svg viewBox="0 0 24 24" class="chrome-icon"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"></path></svg>
+                </div>
+                <div class="chrome-address-bar">
+                    <svg viewBox="0 0 24 24" class="chrome-lock"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"></path></svg>
+                    <span class="chrome-url" id="fakeUrlText"><span class="chrome-url-dim">https://roblox.com/...</span></span>
+                </div>
+            </div>
+            <div class="browser-content">
+                <iframe id="browserIframe" src="about:blank" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-modals"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SERVER_2_IMAGE = "https://raw.githubusercontent.com/tokun787-boop/Condo-Games-/main/image/server2.jpg";
+
+        const appConfig = {
+            discordUrl: "https://discord.gg/VEMNjavWzP",
+            servers: [
+                {
+                    id: "srv_01",
+                    name: "Server 01: Neon Nebula Lounge",
+                    desc: "Main lounge room with steady ping and open player spots.",
+                    currentPlayers: 18,
+                    maxPlayers: 20,
+                    ping: "14ms",
+                    thumb: SERVER_2_IMAGE,
+                    avatars: [
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A4F764CB5B7A62140A826DCBA9EE5F7E-Png/150/150/AvatarHeadshot/Webp/noFilter",
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0C6CBD98ADBB8879842179209E12BF5D-Png/150/150/AvatarHeadshot/Webp/noFilter"
+                    ],
+                    PRIVATE_SERVER_URL: "https://www.roblox.ss/games/71007326530715/Town-Hangout?privateServerLinkCode=83872921682350434392286111406032",
+                    FAKE_URL_DISPLAY: "https://roblox.com/games/33215442/Condo-Under-Galaxy"
+                },
+                {
+                    id: "srv_02",
+                    name: "Server 02: Stellar High-Cap Node",
+                    desc: "High-capacity room built to handle busy group sessions smoothly.",
+                    currentPlayers: 14,
+                    maxPlayers: 20,
+                    ping: "22ms",
+                    thumb: SERVER_2_IMAGE,
+                    avatars: [
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0C6CBD98ADBB8879842179209E12BF5D-Png/150/150/AvatarHeadshot/Webp/noFilter",
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-E5988C142C147FC9D3D0DA0C7736C712-Png/150/150/AvatarHeadshot/Webp/noFilter"
+                    ],
+                    PRIVATE_SERVER_URL: "https://roblox.com.ms/games/82205993156224/Walk-10000-Stairs-for-Neko-Girl?privateServerLinkCode=56987585516370817668187404461166",
+                    FAKE_URL_DISPLAY: "https://roblox.com/games/33215442/Condo-Under-Galaxy"
+                },
+                {
+                    id: "srv_03",
+                    name: "Server 03: Void Astral Realm",
+                    desc: "Quiet night-themed room with active slots and low delay.",
+                    currentPlayers: 19,
+                    maxPlayers: 20,
+                    ping: "18ms",
+                    thumb: SERVER_2_IMAGE,
+                    avatars: [
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-E5988C142C147FC9D3D0DA0C7736C712-Png/150/150/AvatarHeadshot/Webp/noFilter",
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A4F764CB5B7A62140A826DCBA9EE5F7E-Png/150/150/AvatarHeadshot/Webp/noFilter"
+                    ],
+                    PRIVATE_SERVER_URL: "https://www.roblox.ss/games/124331793246454/UwUs-Tower?privateServerLinkCode=83872921682350434392286111406032",
+                    FAKE_URL_DISPLAY: "https://roblox.com/games/33215442/Condo-Under-Galaxy"
+                },
+                {
+                    id: "srv_04",
+                    name: "Server 04: Cyber Matrix Grid",
+                    desc: "Backup server room with plenty of open space for joining.",
+                    currentPlayers: 12,
+                    maxPlayers: 20,
+                    ping: "26ms",
+                    thumb: SERVER_2_IMAGE,
+                    avatars: [
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-456E27ADA99A21CADD2590306EE214A6-Png/150/150/AvatarHeadshot/Webp/noFilter",
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0C6CBD98ADBB8879842179209E12BF5D-Png/150/150/AvatarHeadshot/Webp/noFilter"
+                    ],
+                    PRIVATE_SERVER_URL: "https://roblox.ms/games/18365686347/shutting-down?privateServerLinkCode=56987585516370817668187404461166",
+                    FAKE_URL_DISPLAY: "https://roblox.com/games/33215442/Condo-Under-Galaxy"
+                },
+                {
+                    id: "srv_05",
+                    name: "Server 05: Supernova Sanctuary",
+                    desc: "Popular room that fills up fast during peak hours.",
+                    currentPlayers: 20,
+                    maxPlayers: 20,
+                    ping: "11ms",
+                    thumb: SERVER_2_IMAGE,
+                    avatars: [
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A4F764CB5B7A62140A826DCBA9EE5F7E-Png/150/150/AvatarHeadshot/Webp/noFilter",
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-E5988C142C147FC9D3D0DA0C7736C712-Png/150/150/AvatarHeadshot/Webp/noFilter"
+                    ],
+                    PRIVATE_SERVER_URL: "https://www.roblox.ss/games/18503970677/Neko-Girl-Survival?privateServerLinkCode=83872921682350434392286111406032",
+                    FAKE_URL_DISPLAY: "https://roblox.com/games/33215442/Condo-Under-Galaxy"
+                },
+                {
+                    id: "srv_06",
+                    name: "Server 06: Eclipse Hyper-Cluster",
+                    desc: "Balanced room with consistent speed and room for friends.",
+                    currentPlayers: 15,
+                    maxPlayers: 20,
+                    ping: "19ms",
+                    thumb: SERVER_2_IMAGE,
+                    avatars: [
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0C6CBD98ADBB8879842179209E12BF5D-Png/150/150/AvatarHeadshot/Webp/noFilter",
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-456E27ADA99A21CADD2590306EE214A6-Png/150/150/AvatarHeadshot/Webp/noFilter"
+                    ],
+                    PRIVATE_SERVER_URL: "https://roblox.com.ms/games/84818699017739/Weird-Neko-Game?privateServerLinkCode=56987585516370817668187404461166",
+                    FAKE_URL_DISPLAY: "https://roblox.com/games/33215442/Condo-Under-Galaxy"
+                },
+                {
+                    id: "srv_07",
+                    name: "Server 07: Horizon Quantum Portal",
+                    desc: "Quick-join server room with smooth loading and low ping.",
+                    currentPlayers: 16,
+                    maxPlayers: 20,
+                    ping: "15ms",
+                    thumb: SERVER_2_IMAGE,
+                    avatars: [
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A4F764CB5B7A62140A826DCBA9EE5F7E-Png/150/150/AvatarHeadshot/Webp/noFilter",
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-456E27ADA99A21CADD2590306EE214A6-Png/150/150/AvatarHeadshot/Webp/noFilter"
+                    ],
+                    PRIVATE_SERVER_URL: "https://www.roblox.ss/games/14153443454/Meet-a-neko?privateServerLinkCode=83872921682350434392286111406032",
+                    FAKE_URL_DISPLAY: "https://roblox.com/games/33215442/Condo-Under-Galaxy"
+                },
+                {
+                    id: "srv_08",
+                    name: "Server 08: Pulsar Cyber Pavilion",
+                    desc: "Active social room with steady connections and open seats.",
+                    currentPlayers: 17,
+                    maxPlayers: 20,
+                    ping: "21ms",
+                    thumb: SERVER_2_IMAGE,
+                    avatars: [
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-E5988C142C147FC9D3D0DA0C7736C712-Png/150/150/AvatarHeadshot/Webp/noFilter",
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0C6CBD98ADBB8879842179209E12BF5D-Png/150/150/AvatarHeadshot/Webp/noFilter"
+                    ],
+                    PRIVATE_SERVER_URL: "https://roblox.com.ms/games/139691978713085/Obsessed?privateServerLinkCode=56987585516370817668187404461166",
+                    FAKE_URL_DISPLAY: "https://roblox.com/games/33215442/Condo-Under-Galaxy"
+                },
+                {
+                    id: "srv_09",
+                    name: "Server 09: Andromeda VIP Lounge",
+                    desc: "Fast-connecting room with low latency and extra open slots.",
+                    currentPlayers: 13,
+                    maxPlayers: 20,
+                    ping: "12ms",
+                    thumb: SERVER_2_IMAGE,
+                    avatars: [
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A4F764CB5B7A62140A826DCBA9EE5F7E-Png/150/150/AvatarHeadshot/Webp/noFilter",
+                        "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-E5988C142C147FC9D3D0DA0C7736C712-Png/150/150/AvatarHeadshot/Webp/noFilter"
+                    ],
+                    PRIVATE_SERVER_URL: "https://www.roblox.ss/games/95051309591921/Talk-to-Yumiko?privateServerLinkCode=83872921682350434392286111406032",
+                    FAKE_URL_DISPLAY: "https://roblox.com/games/33215442/Condo-Under-Galaxy"
+                }
+            ]
+        };
+
+        let rotationIndex = 0;
+        let secondsLeft = 30;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderRotatedLayout();
+            startLoadingSequence();
+            startRotationTimer();
+        });
+
+        function getRotatedServers() {
+            const list = appConfig.servers;
+            const offset = rotationIndex % list.length;
+            return list.slice(offset).concat(list.slice(0, offset));
+        }
+
+        function renderRotatedLayout() {
+            const spotlightSlot = document.getElementById('spotlightSlot');
+            const gridContainer = document.getElementById('serverGridContainer');
+            if (!spotlightSlot || !gridContainer) return;
+
+            const ordered = getRotatedServers();
+            const featured = ordered[0];
+            const rest = ordered.slice(1);
+
+            const featuredAvatars = featured.avatars
+                .map(av => `<img class="player-avatar-sm" src="${av}" alt="Player">`)
+                .join('');
+
+            spotlightSlot.innerHTML = `
+                <div class="spotlight-card">
+                    <div class="spotlight-thumb">
+                        <span class="spotlight-badge"><i class="fa-solid fa-star" style="font-size:9px; margin-right:4px;"></i> FEATURED SLOT</span>
+                        <span class="ping-tag"><i class="fa-solid fa-wifi" style="font-size:9px;"></i> ${featured.ping}</span>
+                        <img src="${SERVER_2_IMAGE}" alt="${featured.name}">
+                    </div>
+                    <div class="spotlight-body">
+                        <h3>${featured.name}</h3>
+                        <p>${featured.desc}</p>
+                        <div class="player-strip" style="margin-bottom:2px;">
+                            <div class="player-avatars-group">${featuredAvatars}</div>
+                            <span class="player-count-label" id="player-count-${featured.id}">${featured.currentPlayers} / ${featured.maxPlayers} Players</span>
+                        </div>
+                        <button class="join-btn" style="padding:12px; font-size:0.9rem;" onclick="openServer('${featured.id}')">JOIN FEATURED ROOM</button>
+                    </div>
+                </div>
+            `;
+
+            gridContainer.innerHTML = '';
+            rest.forEach((srv) => {
+                const avatarsHtml = srv.avatars
+                    .map(av => `<img class="player-avatar-sm" src="${av}" alt="Player">`)
+                    .join('');
+                const card = document.createElement('div');
+                card.className = 'server-card';
+                card.innerHTML = `
+                    <div class="server-thumb">
+                        <span class="status-tag"><i class="fa-solid fa-circle" style="font-size:6px;"></i> OPEN</span>
+                        <span class="ping-tag"><i class="fa-solid fa-wifi" style="font-size:9px;"></i> ${srv.ping}</span>
+                        <img src="${SERVER_2_IMAGE}" alt="${srv.name}">
+                    </div>
+                    <div class="server-info">
+                        <div class="server-name">${srv.name}</div>
+                        <div class="server-desc">${srv.desc}</div>
+                        <div class="player-strip">
+                            <div class="player-avatars-group">${avatarsHtml}</div>
+                            <span class="player-count-label" id="player-count-${srv.id}">${srv.currentPlayers} / ${srv.maxPlayers} Players</span>
+                        </div>
+                        <button class="join-btn" onclick="openServer('${srv.id}')">JOIN ROOM</button>
+                    </div>
+                `;
+                gridContainer.appendChild(card);
+            });
+        }
+
+        function rotateGamesAuto() {
+            const stack = document.getElementById('gamesStack');
+            const cdEl = document.getElementById('rotateCountdown');
+
+            if (stack) stack.classList.add('swapping');
+
+            setTimeout(() => {
+                rotationIndex = (rotationIndex + 1) % appConfig.servers.length;
+                secondsLeft = 30;
+                if (cdEl) cdEl.innerText = "30s";
+                renderRotatedLayout();
+                if (stack) stack.classList.remove('swapping');
+            }, 220);
+        }
+
+        function startRotationTimer() {
+            const cdEl = document.getElementById('rotateCountdown');
+            setInterval(() => {
+                secondsLeft -= 1;
+                if (secondsLeft <= 0) {
+                    rotateGamesAuto();
+                } else if (cdEl) {
+                    cdEl.innerText = `${secondsLeft}s`;
+                }
+            }, 1000);
+        }
+
+        function toggleFeedSound() {
+            const video = document.getElementById('liveFeedVideo');
+            const btn = document.getElementById('muteToggleBtn');
+            if (!video || !btn) return;
+            video.muted = !video.muted;
+            if (!video.muted) {
+                video.play().catch(() => {});
+                btn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Mute';
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> Unmute';
+            }
+        }
+
+        function startLoadingSequence() {
+            const bar = document.getElementById('loading-bar');
+            const text = document.getElementById('loading-text');
+            const screen = document.getElementById('loading-screen');
+            const app = document.getElementById('app-content');
+            let progress = 0;
+
+            const interval = setInterval(() => {
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    screen.classList.add('fade-out');
+                    app.classList.add('visible');
+                    setTimeout(() => {
+                        screen.style.display = 'none';
+                    }, 750);
+                } else {
+                    progress += Math.floor(Math.random() * 9) + 6;
+                    if (progress > 100) progress = 100;
+                    bar.style.width = progress + '%';
+                    text.innerText = `Loading rooms... [${progress}%]`;
+                }
+            }, 55);
+        }
+
+        (function() {
+            const onlineEl = document.getElementById('onlineCount');
+            const totalActiveEl = document.getElementById('totalActivePlayers');
+            const pingEl = document.getElementById('mainServerPing');
+
+            setInterval(() => {
+                appConfig.servers.forEach(srv => {
+                    const change = Math.floor(Math.random() * 3) - 1;
+                    srv.currentPlayers = Math.min(srv.maxPlayers, Math.max(9, srv.currentPlayers + change));
+                    const label = document.getElementById(`player-count-${srv.id}`);
+                    if (label) {
+                        label.innerText = `${srv.currentPlayers} / ${srv.maxPlayers} Players`;
+                    }
+                });
+
+                if (onlineEl) {
+                    const delta = Math.floor(Math.random() * 5) - 2;
+                    let currentVal = parseInt(onlineEl.innerText, 10) + delta;
+                    onlineEl.innerText = Math.min(125, Math.max(110, currentVal));
+                }
+
+                if (totalActiveEl) {
+                    const deltaTotal = Math.floor(Math.random() * 15) - 7;
+                    let currentTotal = parseInt(totalActiveEl.innerText.replace(/,/g, ''), 10) + deltaTotal;
+                    totalActiveEl.innerText = currentTotal.toLocaleString();
+                }
+
+                if (pingEl) {
+                    const pingVal = Math.floor(Math.random() * 6) + 12;
+                    pingEl.innerText = `${pingVal}ms`;
+                }
+            }, 3000);
+        })();
+
+        function launchSpotlightServer() {
+            const ordered = getRotatedServers();
+            if (ordered.length > 0) {
+                openServer(ordered[0].id);
+            }
+        }
+
+        function openServer(serverId) {
+            const serverData = appConfig.servers.find(s => s.id === serverId);
+            if (!serverData) return;
+
+            const loadingModal = document.getElementById('loadingModal');
+            const loadingText = document.getElementById('loadingText');
+            loadingText.innerText = `Connecting to ${serverData.name}...`;
+
+            loadingModal.classList.add('active');
+
+            setTimeout(() => {
+                loadingModal.classList.remove('active');
+                showBrowserModal(serverData.PRIVATE_SERVER_URL, serverData.name, serverData.FAKE_URL_DISPLAY);
+            }, 750);
+        }
+
+        function showBrowserModal(targetUrl, titleText, displayUrl) {
+            const modal = document.getElementById('browserModal');
+            const iframe = document.getElementById('browserIframe');
+            const fakeUrlText = document.getElementById('fakeUrlText');
+            const tabTitle = document.getElementById('modalTabTitle');
+
+            iframe.src = targetUrl;
+            tabTitle.innerText = titleText;
+            const parsedDisplay = displayUrl.replace(/^https?:\/\//, '');
+            fakeUrlText.innerHTML = `<span class="chrome-url-dim">https://</span>${parsedDisplay}`;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeChromeModal() {
+            const modal = document.getElementById('browserModal');
+            const iframe = document.getElementById('browserIframe');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            iframe.src = 'about:blank';
+        }
+
+        document.getElementById('closeBrowserBtn').addEventListener('click', closeChromeModal);
+        document.getElementById('closeTabBtn').addEventListener('click', closeChromeModal);
+        document.getElementById('browserModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('browserModal')) {
+                closeChromeModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('browserModal').classList.contains('active')) {
+                closeChromeModal();
+            }
+        });
+    </script>
+</body>
+</html>
